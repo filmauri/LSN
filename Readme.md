@@ -1,2 +1,2 @@
-welcome
-ciao cate
+#REPOSITORY DEL LABORATORIO DI SIMULAZIONE NUMERICA
+Auth: Filippo Mauri

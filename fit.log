@@ -1,0 +1,31 @@
+
+
+*******************************************************************************
+Thu Feb 27 14:15:48 2025
+
+
+FIT:    data read from 'dati.dat'
+        format = z
+        #datapoints = 8
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a*x + b
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b            
+   0 0.0000000000e+00  nan        3.64e+00    1.000000e+00   1.000000e+00
+   1 0.0000000000e+00  nan        3.64e-01    1.000000e+00   1.000000e+00
+
+After 1 iterations the fit converged.
+final sum of squares of residuals : 0
+abs. change during last iteration : 0
+
+
+Hmmmm.... Sum of squared residuals is zero. Can't compute errors.
+
+Final set of parameters 
+======================= 
+
+a               = 1              
+b               = 1              
