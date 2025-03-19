@@ -1,4 +1,3 @@
-//now I'll try to code a class for the Block average
 #ifndef __blockAverage__
 #define __blockAverage__
 
