@@ -81,6 +81,9 @@ double Random :: Angle(){
   double y = Rannyu();
   return 2*y*acos(-1);
 }
+double Random :: phi_spherical(double x){
+  return acos(2*x-1);
+}
 double Random :: Sampling2_1(){
   double y = Rannyu();
   return 1 - sqrt(1-y);

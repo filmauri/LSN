@@ -41,6 +41,9 @@ class Walker{
         double getDistance(){
             return (position[0]*position[0] + position[1]*position[1] + position[2]*position[2]);
         }
+        double getDistanceXY(){
+            return (position[0]*position[0] + position[1]*position[1]);
+        }
         double getX(){return position[0];}
         double getY(){return position[1];}
         double getZ(){return position[2];}

@@ -42,6 +42,7 @@ public:
   //Method to generate a random angle in the range [0, 2pi) without using pi value
   double Angle();
   double Sampling2_1();
+  double phi_spherical(double x);
   double DiscreteMovement();
 };
 

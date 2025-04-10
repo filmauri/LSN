@@ -54,7 +54,7 @@ int main()
                 discrete[L * b + i].latticeStep(rnd.DiscreteMovement());
                 blockDiscrete2 += discrete[L * b + i].getDistance();
 
-                continuous[L * b + i].continuousStep(rnd.Angle(), rnd.Angle()/2);
+                continuous[L * b + i].continuousStep(rnd.Angle(), rnd.phi_spherical(rnd.Rannyu()));
                 blockContinuous2 += continuous[L * b + i].getDistance();
             }
             blockDiscrete2 /= L; //media della distanza quadra sul blocco
