@@ -632,7 +632,9 @@ void System :: measure(){ // Measure properties
         distance(1) = this->pbc( _particle(i).getposition(1,true) - _particle(j).getposition(1,true), 1);
         distance(2) = this->pbc( _particle(i).getposition(2,true) - _particle(j).getposition(2,true), 2);
         dr = sqrt( dot(distance,distance) );
-        // GOFR ... TO BE FIXED IN EXERCISE 7
+        if(dr < _halfside.min() and _measure_gofr){
+					_measurement(_index_gofr + int(floor(dr/double(_bin_size)))) += 2 ;
+				}
         if(dr < _r_cut){
           if(_measure_penergy)  penergy_temp += 1.0/pow(dr,12) - 1.0/pow(dr,6); // POTENTIAL ENERGY
           if(_measure_pressure) virial       += 1.0/pow(dr,12) - 0.5/pow(dr,6); // PRESSURE
@@ -697,6 +699,10 @@ void System :: measure(){ // Measure properties
   if (_measure_chi){
    _measurement(_index_chi) = _beta * pow(spinsum/double(_npart), 2) * double(_npart);
   }
+  // GOFR //////////////////////////////////////////////////////////////////////
+	if(_measure_gofr)
+  for (int i=0; i<_n_bins; i++)
+    _measurement(_index_gofr + i) /= ( _rho * _npart * (4./3.) * M_PI * (pow(_bin_size * (i + 1), 3) - pow(_bin_size * i, 3)) ) ;
 
   _block_av += _measurement; //Update block accumulators
 
@@ -780,6 +786,18 @@ void System :: averages(int blk){
   }
   // GOFR //////////////////////////////////////////////////////////////////////
   // TO BE FIXED IN EXERCISE 7
+  if (_measure_gofr and blk == _nblocks and _sim_type!=2 and _sim_type!=3){
+		coutf.open("../OUTPUT/gofr.dat",ios::app);
+		for(int i=0; i<_n_bins; i++){
+			average	= _average(_index_gofr + i);
+			sum_average = _global_av(_index_gofr + i);
+			sum_ave2 = _global_av2(_index_gofr + i);
+			coutf << setw(12) << i*_bin_size
+					<< setw(12) << sum_average/double(blk)
+					<< setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
+		}
+		coutf.close();
+	}
   // POFV //////////////////////////////////////////////////////////////////////
   // TO BE FIXED IN EXERCISE 4
   if (_measure_pofv){
