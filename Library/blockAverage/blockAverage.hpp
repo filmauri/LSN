@@ -214,8 +214,24 @@ class putOptionStep : public BlockAverage{
     double r = 0.1; // risk-free interest rate
     double sigma = 0.25; // volatility 
 };
-
 /*
+
+
+class H_medio : public BlockAverage{
+    public:
+    H_medioStep(int M, int N) : BlockAverage (M, N) {;} 
+    virtual ~putOptionStep() {;}
+    double block() override{
+        double to_return = 0;
+        for (int i = 0; i < L; i++){
+
+            to_return += eval_H_Psi()
+        }
+
+    }
+
+    private:
+}
 class putOption : public BlockAverage{
     public:
     putOption(int M, int N) : BlockAverage(M, N) {;}

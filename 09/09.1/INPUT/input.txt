@@ -1,0 +1,9 @@
+TYPE                        0
+NORM_ORDER					1
+POWER      				    3
+N_CITIES					34
+N_INDIVIDUALS				300
+N_GENERATIONS				1000
+PROB_MUTATIONS				4 0.2 0.2 0.2 0.2   
+
+ENDINPUT
