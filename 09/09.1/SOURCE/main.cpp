@@ -22,6 +22,7 @@ int main(){
             tsp.evolution(i);
             //tsp.printPopulation();
             tsp.bestTravel(i);
+            tsp.averageLoss(i);
 
             if (i % 10 == 0) 
                 tsp.partialFinalization(i);

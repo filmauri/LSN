@@ -1,6 +1,6 @@
 #ifndef __GENETICLIBRARY__
 #define __GENETICLIBRARY__
-#include <iostream>
+#include <iostream>™£
 #include <cmath>
 #include <fstream>
 #include <string>
@@ -16,7 +16,7 @@ using namespace arma;
 class TSP{
     
 public: 
-    //reaading the input file and initializing the parameters
+    //reading the input file and initializing the parameters
     void initialize(){
         _rnd = Random("../../../Library/PRNG/");
         ifstream input("../INPUT/input.txt");
@@ -98,9 +98,7 @@ public:
                         exit(EXIT_FAILURE);
                     }
                 }
-                coutf << "Mutation probabilities initialized." << endl;
-                
-                
+                coutf << "Mutation probabilities initialized." << endl; 
             }else if (property == "ENDINPUT") {
                 _loss.set_size(_nIndividuals);
                 coutf << "System initialized!" << std::endl;
@@ -146,397 +144,364 @@ public:
         coutf.close();
     }
 
-void generate_tsp_population() {
-    // PROBLEMA: Usa parametri invece di variabili membro
-    _population.set_size(_nCities, _nIndividuals);
-    arma::vec base_remaining = arma::regspace(1, _nCities - 1);
+    void generate_tsp_population() {
+        // PROBLEMA: Usa parametri invece di variabili membro
+        _population.set_size(_nCities, _nIndividuals);
+        arma::vec base_remaining = arma::regspace(1, _nCities - 1);
     
-    for (int i = 0; i < _nIndividuals; ++i) {
-        _population(0, i) = 0;
-        arma::vec shuffled = arma::shuffle(base_remaining);
-        _population.submat(1, i, _nCities - 1, i) = shuffled;
+        for (int i = 0; i < _nIndividuals; ++i) {
+            _population(0, i) = 0;
+            arma::vec shuffled = arma::shuffle(base_remaining);
+            _population.submat(1, i, _nCities - 1, i) = shuffled;
+        }
     }
-}
 
-void checkPopulation() {
-    if (_population.n_rows != _nCities || _population.n_cols != _nIndividuals) {
-        cerr << "Error: Population size mismatch." << endl;
-        exit(EXIT_FAILURE);
-    }
-    for (int i = 0; i < _nIndividuals; ++i) {
-        arma::vec individual = _population.col(i);
-        for (int j = 0; j < _nCities; ++j) {
-            if (arma::sum(individual == j) != 1) {
-                cerr << "Error: Individual " << i << " does not contain all cities." << endl;
-                exit(EXIT_FAILURE);
+    void checkPopulation() {
+        if (_population.n_rows != _nCities || _population.n_cols != _nIndividuals) {
+            cerr << "Error: Population size mismatch." << endl;
+            exit(EXIT_FAILURE);
+        }
+        for (int i = 0; i < _nIndividuals; ++i) {
+            arma::vec individual = _population.col(i);
+            for (int j = 0; j < _nCities; ++j) {
+                if (arma::sum(individual == j) != 1) {
+                    cerr << "Error: Individual " << i << " does not contain all cities." << endl;
+                    exit(EXIT_FAILURE);
+                }
             }
         }
     }
-}
 
-void checkStartingPos(){
-    int invalid_count = 0;
-    for (int i = 0; i < _population.n_cols; ++i) 
-        if (_population(0, i) != 0) 
-            invalid_count++;
-        
-    if (invalid_count != 0) 
-        exit(EXIT_FAILURE);
-}
-
-void printPopulation(){
-    cout << "Population of TSP: " << _nIndividuals << endl;
-    
-    for (int i = 0; i < _nIndividuals; i++) {
-        cout << "Individual " << i + 1 << ": ";
-        for (int j = 0; j < _nCities; j++) {
-            cout << _population(j, i) << " ";
-        }
-        cout << endl;
-    }
-}
-
-double distance(int city, int individualIndex) {
-    int city1_index = _population(city, individualIndex);
-    int city2_index = _population(boundary_condition(city + 1), individualIndex);
-    
-    arma::vec city1_pos = _cities(city1_index).getCoordinates();
-    arma::vec city2_pos = _cities(city2_index).getCoordinates();
-    
-    double dx = city1_pos(0) - city2_pos(0);
-    double dy = city1_pos(1) - city2_pos(1);
-    
-    if (_normOrder == 1) {
-        return sqrt(dx*dx + dy*dy);  // Distanza euclidea
-    } else if (_normOrder == 2)     
-        return dx*dx + dy*dy; // Distanza quadratica
-    else 
-        return 1;
-}
-
-int boundary_condition(int i_city) {
-    if (i_city < 0) {
-        return _nCities - 1; // Torna all'ultima città se si esce a sinistra
-    } else if (i_city >= _nCities) {
-        return 0; // Torna alla prima città se si esce a destra
-    }
-    return i_city; // Ritorna l'indice della città se è valido
-}
-
-double loss_travel(int individualIndex) {
-    double loss = 0.0;
-    for (int cityIndex = 0; cityIndex < _nCities; cityIndex++) {
-        loss += distance(cityIndex, individualIndex);
-    }
-    return loss;
-}
-
-void loss(){
-    for (int travelIndex = 0; travelIndex < _nIndividuals; travelIndex++) {
-        double individualLoss = loss_travel(travelIndex);
-        if (individualLoss < 0) {
-            cerr << "Error: Negative loss encountered for individual " << travelIndex << "." << endl;
+    void checkStartingPos(){
+        int invalid_count = 0;
+        for (int i = 0; i < _population.n_cols; ++i) 
+            if (_population(0, i) != 0) 
+                invalid_count++;
+            
+        if (invalid_count != 0) 
             exit(EXIT_FAILURE);
+    }
+
+    void printPopulation(){
+        cout << "Population of TSP: " << _nIndividuals << endl;
+        
+        for (int i = 0; i < _nIndividuals; i++) {
+            cout << "Individual " << i + 1 << ": ";
+            for (int j = 0; j < _nCities; j++) {
+                cout << _population(j, i) << " ";
+            }
+            cout << endl;
         }
-        _loss(travelIndex) = individualLoss;
-    }   
-    this->sortPopulationbyLoss();
-}
+    }
 
-void sortPopulationbyLoss() { 
-    arma::uvec sortedIndices = arma::sort_index(_loss);
-    _population = _population.cols(sortedIndices);
-    _loss = _loss(sortedIndices);
-}
+    double distance(int city, int individualIndex) {
+        int city1_index = _population(city, individualIndex);
+        int city2_index = _population(boundary_condition(city + 1), individualIndex);
+        
+        arma::vec city1_pos = _cities(city1_index).getCoordinates();
+        arma::vec city2_pos = _cities(city2_index).getCoordinates();
+        
+        double dx = city1_pos(0) - city2_pos(0);
+        double dy = city1_pos(1) - city2_pos(1);
+        
+        if (_normOrder == 1) {
+            return sqrt(dx*dx + dy*dy);  // Distanza euclidea
+        } else if (_normOrder == 2)     
+            return dx*dx + dy*dy; // Distanza quadratica
+        else 
+            return 1;
+    }
 
-void bestTravel(int gen) {
-    ofstream coutf("../OUTPUT/output.txt", ios::app);
-    //coutf << "Generation " << gen << " - Best loss: " << _loss(0) 
-          //<< " - Worst loss: " << _loss(_nIndividuals-1) 
-          //<< " - Average loss: " << arma::mean(_loss) << endl;
+    int boundary_condition(int i_city) {
+        if (i_city < 0) {
+            return _nCities - 1; // Torna all'ultima città se si esce a sinistra
+        } else if (i_city >= _nCities) {
+            return 0; // Torna alla prima città se si esce a destra
+        }
+        return i_city; // Ritorna l'indice della città se è valido
+    }
 
-    if (gen % 50 == 0) {
-        coutf << "Best travel in generation " << gen << ": ";
+    double loss_travel(int individualIndex) {
+        double loss = 0.0;
+        for (int cityIndex = 0; cityIndex < _nCities; cityIndex++) {
+            loss += distance(cityIndex, individualIndex);
+        }
+        return loss;
+    }
+
+    void loss(){
+        for (int travelIndex = 0; travelIndex < _nIndividuals; travelIndex++) {
+            double individualLoss = loss_travel(travelIndex);
+            if (individualLoss < 0) {
+                cerr << "Error: Negative loss encountered for individual " << travelIndex << "." << endl;
+                exit(EXIT_FAILURE);
+            }
+            _loss(travelIndex) = individualLoss;
+        }   
+        this->sortPopulationbyLoss();
+    }
+
+    void sortPopulationbyLoss() { 
+        arma::uvec sortedIndices = arma::sort_index(_loss);
+        _population = _population.cols(sortedIndices);
+        _loss = _loss(sortedIndices);
+    }
+
+    void bestTravel(int gen) {
+        ofstream coutf("../OUTPUT/output.txt", ios::app);
+        if (gen % 50 == 0) {
+            coutf << "Best travel in generation " << gen << ": ";
+            for (int i = 0; i < _nCities; i++) {
+                coutf << _population(i, 0) << " ";
+            }
+            coutf << "Loss: " << _loss(0) << endl;
+            coutf << endl;
+        }
+        coutf.close();
+    }
+    int selection() {
+        int index;
+        index = static_cast<int>(_nIndividuals * (pow(_rnd.Rannyu(), _power)));
+        return index;
+    }
+
+    void swap (int a, int b){
+        int t = a;
+        a = b;
+        b = t;
+    }
+
+    void pairPermutationWithFixedStart(int individual) {
+        
+        int city1 = 1 + int(_rnd.Rannyu() * (_nCities - 1));
+        int city2;
+        do {
+            city2 = 1 + int(_rnd.Rannyu() * (_nCities - 1));
+        } while (city1 == city2);
+
+        double temp = _population(city1, individual);
+        _population(city1, individual) = _population(city2, individual);
+        _population(city2, individual) = temp;
+        
+        this->checkPopulation();
+        this->checkStartingPos();
+    }
+
+    void shift(int travelIndex) {
+        int shift = int(_rnd.Rannyu() * (_nCities - 2)) + 1; // Random shift between 1 and n_cities-2
+        
+        // Explicit conversion from double to int - correct syntax
+        arma::Col<int> temp_travel = arma::conv_to<arma::Col<int>>::from(_population.col(travelIndex));
+        
+        arma::Col<int> route_without_start = temp_travel.subvec(1, _nCities - 1);
+        
+        // Perform circular shift on the remaining cities
+        for (int i = 0; i < shift; i++) {
+            int last_city = route_without_start(route_without_start.n_elem - 1); // Get last city
+            route_without_start.shed_row(route_without_start.n_elem - 1);         // Remove last city
+            route_without_start.insert_rows(0, arma::Col<int>({last_city}));      // Insert at beginning
+        }
+        
+        // Reconstruct the complete travel with the first city still at position 0
+        temp_travel.subvec(1, _nCities - 1) = route_without_start;
+        
+        // Convert back to double if needed and assign
+        _population.col(travelIndex) = arma::conv_to<arma::Col<double>>::from(temp_travel);
+
+        this->checkPopulation();
+        this->checkStartingPos();
+    }
+
+    void blockPermutation(int travelIndex) {
+        int n_index = int(_rnd.Rannyu(1, _nCities/4)); // Block size between 1 and nCities/4
+        int block1_start = int(_rnd.Rannyu(1, _nCities/2)); // Start index for block 1
+        int block2_start = _nCities/2; 
+        do {
+            block2_start = int(_rnd.Rannyu(1, _nCities - n_index)); // Start index for block 2
+        }while(block2_start - block1_start <= n_index);
+
+        arma::Col<int> temp_travel = arma::conv_to<arma::Col<int>>::from(_population.col(travelIndex));
+        
+        // Estrai i due blocchi
+        arma::Col<int> block1 = temp_travel.subvec(block1_start, block1_start + n_index);
+        arma::Col<int> block2 = temp_travel.subvec(block2_start, block2_start + n_index);
+        
+        // Scambia i blocchi
+        temp_travel.subvec(block1_start, block1_start + n_index) = block2;
+        temp_travel.subvec(block2_start, block2_start + n_index) = block1;
+        
+        // Riconverti e aggiorna la popolazione
+        _population.col(travelIndex) = arma::conv_to<arma::colvec>::from(temp_travel);
+        
+        // Verifica la validità della soluzione
+        this->checkPopulation();
+        this->checkStartingPos();
+    }
+
+    void Inversion(int travelIndex) {
+        // Select two random indices to define the block
+        int start = int(_rnd.Rannyu() * (_nCities - 2)) + 1;  // Range: 1 to nCities-2
+        int end = int(_rnd.Rannyu() * (_nCities - start)) + start;  // Range: start to nCities-1
+        if (start > end) {
+            swap(start, end);
+        }
+
+        arma::Col<int> temp_travel = arma::conv_to<arma::Col<int>>::from(_population.col(travelIndex));
+        arma::Col<int> block = temp_travel.subvec(start, end);
+        block = arma::flipud(block);
+        
+        temp_travel.subvec(start, end) = block;
+        _population.col(travelIndex) = arma::conv_to<arma::colvec>::from(temp_travel);
+        
+        this->checkPopulation();
+        this->checkStartingPos();
+    }
+
+    void mutation(int travelIndex) {
+        if (_rnd.Rannyu() < _probMutations(0)) {
+            pairPermutationWithFixedStart(travelIndex);
+        } else if (_rnd.Rannyu() < _probMutations(1)) {
+            shift(travelIndex);
+        } else if (_rnd.Rannyu() < _probMutations(2)) {
+            blockPermutation(travelIndex);
+        } else if (_rnd.Rannyu() < _probMutations(3)) {
+            Inversion(travelIndex);
+        } else {
+            // No mutation
+            return;
+        }
+    } 
+
+    void crossOver(int travelIndex, int index1, int index2) {
+        int cutPoint = 1 + _rnd.Rannyu(0, _nCities - 2); // Taglio tra posizione 1 e _nCities-2
+        
+        arma::Col<int> parent1 = arma::conv_to<arma::Col<int>>::from(_population.col(index1));
+        arma::Col<int> parent2 = arma::conv_to<arma::Col<int>>::from(_population.col(index2));
+
+        // 3. Crea i due offspring
+        arma::Col<int> offspring1(_nCities);
+        arma::Col<int> offspring2(_nCities);
+        
+        // 4. Conserva la prima parte di entrambi i genitori e crea liste delle città utilizzate
+        std::vector<bool> used1(_nCities, false);
+        std::vector<bool> used2(_nCities, false);
+        for (int i = 0; i < cutPoint; i++) {
+            offspring1(i) = parent1(i);
+            offspring2(i) = parent2(i);
+            used1[offspring1(i)] = true;
+            used2[offspring2(i)] = true;
+        }
+
+        // 5. Completa offspring1 con le città mancanti nell'ordine di parent2
+        int pos1 = cutPoint;
+        for (int i = 0; i < _nCities && pos1 < _nCities; i++) {
+            int city = parent2(i);
+            if (!used1[city]) {
+                offspring1(pos1) = city;
+                used1[city] = true;
+                pos1++;
+            }
+        }
+        // 6. Inserisce un figlio nella popolazione
+        _population.col(travelIndex) = arma::conv_to<arma::colvec>::from(offspring1);
+
+        // 7. Verifica la validità dell'individuo generato
+        this->checkPopulation();
+        this->checkStartingPos();
+    }
+
+    //perform one generation of the genetic algorithm
+    void evolution(int num) {
+        this->loss(); // Ensure the population is sorted by loss
+        for (int i = 0; i < _nIndividuals; i++) {
+            cout << "Individual " << i + 1 << ": ";
+            for (int j = 0; j < _nCities; j++) {
+                cout << _population(j, i) << " ";
+            }
+            cout << "Loss: " << _loss(i) << endl;
+        }
+
+        for (int i = 0; i < _nIndividuals; i++) {
+            int parent1 = this->selection();
+            int parent2; 
+            do {
+                parent2 = this->selection();
+            }while(parent2 == parent1); 
+
+            if (_rnd.Rannyu() < _probMutations(4)) { 
+            this->crossOver(i, parent1, parent2);
+            }
+
+            this->mutation(i);    
+            this->loss();
+        }
+        
+        this->checkPopulation();
+        this->checkStartingPos();
+        this->saveBestLoss(num);
+
+        if (num % 10 == 0) {
+            this->partialFinalization(num);
+        }
+    } 
+
+
+    int getNGenerations() const {
+        return _nGenerations;
+    }
+
+    void finalize() {
+        ofstream coutf("../OUTPUT/output.txt", ios::app);
+        coutf << "Finalizing TSP..." << endl;
+        coutf << "Best travel found: " << endl;
         for (int i = 0; i < _nCities; i++) {
-            coutf << _population(i, 0) << " ";
+            coutf << _cities(_population(i, 0)).getX() << " " << _cities(_population(i, 0)).getY() << endl;
         }
         coutf << "Loss: " << _loss(0) << endl;
-        coutf << endl;
-    }
-    coutf.close();
-}
-int selection() {
-    int index;
-    index = static_cast<int>(_nIndividuals * (pow(_rnd.Rannyu(), _power)));
-    return index;
-}
-
-void swap (int a, int b){
-    int t = a;
-	a = b;
-	b = t;
-}
-
-void pairPermutationWithFixedStart(int individual) {
-    
-    int city1 = 1 + int(_rnd.Rannyu() * (_nCities - 1));
-    int city2;
-    do {
-        city2 = 1 + int(_rnd.Rannyu() * (_nCities - 1));
-    } while (city1 == city2);
-
-    double temp = _population(city1, individual);
-    _population(city1, individual) = _population(city2, individual);
-    _population(city2, individual) = temp;
-    
-    this->checkPopulation();
-    this->checkStartingPos();
-}
-
-void shift(int travelIndex) {
-    int shift = int(_rnd.Rannyu() * (_nCities - 2)) + 1; // Random shift between 1 and n_cities-2
-    
-    // Explicit conversion from double to int - correct syntax
-    arma::Col<int> temp_travel = arma::conv_to<arma::Col<int>>::from(_population.col(travelIndex));
-    
-    arma::Col<int> route_without_start = temp_travel.subvec(1, _nCities - 1);
-    
-    // Perform circular shift on the remaining cities
-    for (int i = 0; i < shift; i++) {
-        int last_city = route_without_start(route_without_start.n_elem - 1); // Get last city
-        route_without_start.shed_row(route_without_start.n_elem - 1);         // Remove last city
-        route_without_start.insert_rows(0, arma::Col<int>({last_city}));      // Insert at beginning
-    }
-    
-    // Reconstruct the complete travel with the first city still at position 0
-    temp_travel.subvec(1, _nCities - 1) = route_without_start;
-    
-    // Convert back to double if needed and assign
-    _population.col(travelIndex) = arma::conv_to<arma::Col<double>>::from(temp_travel);
-
-    this->checkPopulation();
-    this->checkStartingPos();
-}
-
-void blockPermutation(int travelIndex) {
-    int n_index = 2;
-    int block1_start = int(_rnd.Rannyu(1, _nCities/2)); // Start index for block 1
-    int block2_start = _nCities/2; 
-    do {
-        block2_start = int(_rnd.Rannyu(1, _nCities - n_index)); // Start index for block 2
-    }while(block2_start - block1_start <= n_index);
-
-    arma::Col<int> temp_travel = arma::conv_to<arma::Col<int>>::from(_population.col(travelIndex));
-    
-    // Estrai i due blocchi
-    arma::Col<int> block1 = temp_travel.subvec(block1_start, block1_start + n_index);
-    arma::Col<int> block2 = temp_travel.subvec(block2_start, block2_start + n_index);
-    
-    // Scambia i blocchi
-    temp_travel.subvec(block1_start, block1_start + n_index) = block2;
-    temp_travel.subvec(block2_start, block2_start + n_index) = block1;
-    
-    // Riconverti e aggiorna la popolazione
-    _population.col(travelIndex) = arma::conv_to<arma::colvec>::from(temp_travel);
-    
-    // Verifica la validità della soluzione
-    this->checkPopulation();
-    this->checkStartingPos();
-}
-
-void Inversion(int travelIndex) {
-    // Select two random indices to define the block
-    int start = int(_rnd.Rannyu() * (_nCities - 2)) + 1;  // Range: 1 to nCities-2
-    int end = int(_rnd.Rannyu() * (_nCities - start)) + start;  // Range: start to nCities-1
-    if (start > end) {
-        swap(start, end);
+        coutf.close();
     }
 
-    arma::Col<int> temp_travel = arma::conv_to<arma::Col<int>>::from(_population.col(travelIndex));
-    arma::Col<int> block = temp_travel.subvec(start, end);
-    block = arma::flipud(block);
-    
-    temp_travel.subvec(start, end) = block;
-    _population.col(travelIndex) = arma::conv_to<arma::colvec>::from(temp_travel);
-    
-    this->checkPopulation();
-    this->checkStartingPos();
-}
-
-void mutation(int travelIndex) {
-   // cout << "Performing mutation for travel index: " << travelIndex << endl;
-    //double mutationProbability = _rnd.Rannyu();
-    //int mutationType = _rnd.Rannyu(0, 4); // Randomly choose a mutation type
-    //cout << "Mutation type: " << mutationType << endl;
-    /*if (mutationProbability < _probMutations(mutationType)) {
-    switch (mutationType) {
-        case 0:
-            pairPermutationWithFixedStart(travelIndex);
-            break;
-        case 1:
-            shift(travelIndex);
-            break;
-        case 2:
-            blockPermutation(travelIndex);
-            break;
-        case 3:
-            Inversion(travelIndex);
-            break;
-        default:
-            cerr << "Error: Invalid mutation type." << endl;
-            exit(EXIT_FAILURE);
+    void saveBestLoss(int gen) {
+        ofstream lossFile("../OUTPUT/loss.txt", ios::app);
+        if (!lossFile.is_open()) {
+            cerr << "Error: Could not open loss.txt file." << endl;
+            return;
         }
-    }*/
-    if (_rnd.Rannyu() < _probMutations(0)) {
-        pairPermutationWithFixedStart(travelIndex);
-    } else if (_rnd.Rannyu() < _probMutations(1)) {
-        shift(travelIndex);
-    } else if (_rnd.Rannyu() < _probMutations(2)) {
-        blockPermutation(travelIndex);
-    } else if (_rnd.Rannyu() < _probMutations(3)) {
-        Inversion(travelIndex);
-    } else {
-        // No mutation
-        return;
-    }
-} 
-
-void crossOver(int travelIndex, int index1, int index2) {
-    int cutPoint = 1 + _rnd.Rannyu(0, _nCities - 2); // Taglio tra posizione 1 e _nCities-2
-    
-    arma::Col<int> parent1 = arma::conv_to<arma::Col<int>>::from(_population.col(index1));
-    arma::Col<int> parent2 = arma::conv_to<arma::Col<int>>::from(_population.col(index2));
-
-    // 3. Crea i due offspring
-    arma::Col<int> offspring1(_nCities);
-    arma::Col<int> offspring2(_nCities);
-    
-    // 4. 5. Conserva la prima parte di entrambi i genitori e crea liste delle città utilizzate
-    std::vector<bool> used1(_nCities, false);
-    std::vector<bool> used2(_nCities, false);
-    for (int i = 0; i < cutPoint; i++) {
-        offspring1(i) = parent1(i);
-        offspring2(i) = parent2(i);
-        used1[offspring1(i)] = true;
-        used2[offspring2(i)] = true;
+        
+        lossFile << gen << " " << _loss(0) << endl;
+        lossFile.close();
     }
 
-    // 6. Completa offspring1 con le città mancanti nell'ordine di parent2
-    int pos1 = cutPoint;
-    for (int i = 0; i < _nCities && pos1 < _nCities; i++) {
-        int city = parent2(i);
-        if (!used1[city]) {
-            offspring1(pos1) = city;
-            used1[city] = true;
-            pos1++;
+
+    void partialFinalization(int gen) {
+        string filename = "../OUTPUT/output" + to_string(gen) + ".txt";
+        ofstream coutf(filename);
+        coutf << "Partial results after generation " << gen << ": " << endl;
+        for (int i = 0; i < _nCities; i++) {
+            coutf << _cities(_population(i, 0)).getX() << " " << _cities(_population(i, 0)).getY() << endl;
         }
+        coutf << "Loss: " << _loss(0) << endl;
+        coutf.close();
     }
-    /*
-    // 7. Completa offspring2 con le città mancanti nell'ordine di parent1
-    int pos2 = cutPoint;
-    for (int i = 0; i < _nCities && pos2 < _nCities; i++) {
-        int city = parent1(i);
-        if (!used2[city]) {
-            offspring2(pos2) = city;
-            used2[city] = true;
-            pos2++;
+
+    //function that gives $L^{(2)}$ (or $L^{(1)}$) of the best path and of the loss, averaged on the best half of the population, 
+    // as a function of the iterations/generations
+    void averageLoss(int nGenerations) {
+        double totalLoss = 0.0;
+        for (int i = 0; i < _nIndividuals / 2; i++) {
+            totalLoss += _loss(i);
         }
-    }*/
-    
-    /* 8. SOSTITUISCI I GENITORI ORIGINALI con gli offspring
-
-    _population.col(index1) = arma::conv_to<arma::colvec>::from(offspring1);
-    _population.col(index2) = arma::conv_to<arma::colvec>::from(offspring2);*/
-    _population.col(travelIndex) = arma::conv_to<arma::colvec>::from(offspring1);
-
-    // 9. Verifica la validità
-    this->checkPopulation();
-    this->checkStartingPos();
-}
-
-//perform one generation of the genetic algorithm
-void evolution(int num) {
-    //elitismo
-    this->loss(); // Ensure the population is sorted by loss
-    // Keep the best individual
-    //arma::vec bestIndividual1 = _population.col(0);
-    // stampa a video la popolazione ordinata in base alle loss
-    for (int i = 0; i < _nIndividuals; i++) {
-        cout << "Individual " << i + 1 << ": ";
-        for (int j = 0; j < _nCities; j++) {
-            cout << _population(j, i) << " ";
+        double averageLoss = totalLoss / (_nIndividuals / 2);
+        
+        ofstream lossFile("../OUTPUT/average_loss.txt", ios::app);
+        if (!lossFile.is_open()) {
+            cerr << "Error: Could not open average_loss.txt file." << endl;
+            return;
         }
-        cout << "Loss: " << _loss(i) << endl;
+        
+        lossFile << nGenerations << " " << averageLoss << endl;
+        lossFile.close();
     }
-
-    for (int i = 0; i < _nIndividuals; i++) {
-        int parent1 = this->selection();
-        int parent2; 
-        do {
-            parent2 = this->selection();
-        }while(parent2 == parent1); // Ensure parent2 is different from parent1
-
-        if (_rnd.Rannyu() < 0.8) { // 80% chance of crossover
-        this->crossOver(i, parent1, parent2);
-        }
-
-        this->mutation(i);    
-        this->loss(); // Recalculate loss after mutations and crossovers
-    }
-    //_population.col(0) = arma::conv_to<arma::colvec>::from(bestIndividual1); // Restore the best individual
-    
-    this->loss(); // Recalculate loss after mutations and crossovers
-    this->checkPopulation();
-    this->checkStartingPos();
-    this->saveBestLoss(num);
-    //stampa il best travel
-    if (num % 10 == 0) {
-        this->partialFinalization(num);
-    }
-} 
-
-
-int getNGenerations() const {
-    return _nGenerations;
-}
-
-void finalize() {
-    ofstream coutf("../OUTPUT/output.txt", ios::app);
-    coutf << "Finalizing TSP..." << endl;
-    coutf << "Best travel found: " << endl;
-    for (int i = 0; i < _nCities; i++) {
-        coutf << _cities(_population(i, 0)).getX() << " " << _cities(_population(i, 0)).getY() << endl;
-    }
-    coutf << "Loss: " << _loss(0) << endl;
-    coutf.close();
-}
-
-void saveBestLoss(int gen) {
-    ofstream lossFile("../OUTPUT/loss.txt", ios::app);
-    if (!lossFile.is_open()) {
-        cerr << "Error: Could not open loss.txt file." << endl;
-        return;
-    }
-    
-    lossFile << gen << " " << _loss(0) << endl;
-    lossFile.close();
-}
-
-
-void partialFinalization(int gen) {
-    string filename = "../OUTPUT/output" + to_string(gen) + ".txt";
-    ofstream coutf(filename);
-    
-    // DEBUG: Stampa l'indice della prima città del miglior individuo
-    coutf << "DEBUG: First city index of best individual: " << _population(0, 0) << endl;
-    
-    coutf << "Partial results after generation " << gen << ": " << endl;
-    for (int i = 0; i < _nCities; i++) {
-        coutf << _cities(_population(i, 0)).getX() << " " << _cities(_population(i, 0)).getY() << endl;
-    }
-    coutf << "Loss: " << _loss(0) << endl;
-    coutf.close();
-}
 
 private:
     Random _rnd;
