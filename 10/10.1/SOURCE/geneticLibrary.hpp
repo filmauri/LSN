@@ -13,6 +13,44 @@
 using namespace std;
 using namespace arma;
 
+void initializeRandomDirectly(Random& rnd, int rank) {
+    // Leggi Primes
+    ifstream Primes("../../../Library/PRNG/Primes");
+    int p1, p2;
+    if (Primes.is_open()) {
+        Primes >> p1 >> p2;
+        Primes.close();
+    }
+    
+    // Leggi seed base
+    ifstream input("../../../Library/PRNG/seed.in");
+    string property;
+    int baseSeed[4];
+    
+    if (input.is_open()) {
+        while (!input.eof()) {
+            input >> property;
+            if (property == "RANDOMSEED") {
+                input >> baseSeed[0] >> baseSeed[1] >> baseSeed[2] >> baseSeed[3];
+                break;
+            }
+        }
+        input.close();
+    }
+    
+    // Modifica i semi in base al rank
+    int seeds[4];
+    seeds[0] = (baseSeed[0] + rank * 1237) % 4096;
+    seeds[1] = (baseSeed[1] + rank * 2347) % 4096; 
+    seeds[2] = (baseSeed[2] + rank * 3457) % 4096;
+    seeds[3] = (baseSeed[3] + rank * 4567) % 4096;
+    
+    // Usa SetRandom per bypassare il file
+    rnd.SetRandom(seeds, p1, p2);
+    
+    cout << "Rank " << rank << ": Direct seeds [" << seeds[0] << ", " 
+         << seeds[1] << ", " << seeds[2] << ", " << seeds[3] << "]" << endl;
+}
 
 class TSP{
     
@@ -20,6 +58,8 @@ public:
     //reading the input file and initializing the parameters
     void initialize(int rank){
         _rnd = Random("../../../Library/PRNG/");
+        initializeRandomDirectly(_rnd, rank);
+        cout << "Rank " << rank << ": Random number generator initialized." << _rnd.Rannyu() <<endl;
         ifstream input("../INPUT/input.dat");
         _rank = rank;
         if (!input.is_open()) {
@@ -121,20 +161,21 @@ public:
             }
             
         }
+        _cities.set_size(_nCities);
         if (_rank == 0) {
-            cout << "Initializing cities..." << endl;
+        cout << "Rank " << _rank << ": Initializing cities..." << endl;
         this->initialize_cities();
-        cout << "Generating TSP population..." << endl;
+        cout << "Rank " << _rank << ": Generating TSP population..." << endl;
         this->generate_tsp_population();
-        cout << "Checking generated population" << endl;
+        cout << "Rank " << _rank << ": Checking generated population" << endl;
         this->checkPopulation();
         this->checkStartingPos();
-        cout << "Population check completed." << endl;
-        } 
+        cout << "Rank " << _rank << ": Population check completed." << endl;
+    } 
     }
     
     void initialize_cities(){
-        _cities.set_size(_nCities);
+       // _cities.set_size(_nCities);
         arma::vec pos;
         pos.set_size(_dimension);
         ifstream citiesFile("../INPUT/cap_prov_ita.dat");
@@ -445,14 +486,7 @@ void crossOver(int travelIndex, int index1, int index2) {
 //perform one generation of the genetic algorithm
 void evolution(int num) {
     this->loss(); // Ensure the population is sorted by loss
-    for (int i = 0; i < _nIndividuals; i++) {
-        cout << "Individual " << i + 1 << ": ";
-        for (int j = 0; j < _nCities; j++) {
-            cout << _population(j, i) << " ";
-        }
-        cout << "Loss: " << _loss(i) << endl;
-    }
-
+    
     for (int i = 0; i < _nIndividuals; i++) {
         int parent1 = this->selection();
         int parent2; 
@@ -470,7 +504,6 @@ void evolution(int num) {
     
     this->checkPopulation();
     this->checkStartingPos();
-    this->saveBestLoss(num);
 
     if (num % 10 == 0) {
         this->partialFinalization(num);
@@ -504,6 +537,18 @@ void saveBestLoss(int gen) {
     lossFile.close();
 }
 
+void saveBestLoss(int gen, int rank) {
+    string filename = "../OUTPUT/loss" + to_string(rank) + ".txt";
+    ofstream lossFile(filename, ios::app);
+    if (!lossFile.is_open()) {
+        cerr << "Error: Could not open " << filename << " file." << endl;
+        return;
+    }
+    
+    lossFile << gen << " " << _loss(0) << endl;
+    lossFile.close();
+}
+
 
 void partialFinalization(int gen) {
     string filename = "../OUTPUT/output" + to_string(gen) + ".txt";
@@ -512,6 +557,7 @@ void partialFinalization(int gen) {
     for (int i = 0; i < _nCities; i++) {
         coutf << _cities(_population(i, 0)).getX() << " " << _cities(_population(i, 0)).getY() << endl;
     }
+    coutf << "Loss: " << _loss(0) << endl;
     coutf.close();
 }
 

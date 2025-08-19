@@ -1,6 +1,6 @@
 #ifndef __GENETICLIBRARY__
 #define __GENETICLIBRARY__
-#include <iostream>™£
+#include <iostream>
 #include <cmath>
 #include <fstream>
 #include <string>

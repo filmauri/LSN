@@ -26,7 +26,8 @@ int main(int argc, char* argv[]){
 
     TSP tsp;
     cout << "Initializing TSP..." << endl;
-    tsp.initialize(0);
+    tsp.initialize(rank);
+    
     Random _rnd("../../../Library/PRNG/");
 
     arma::Mat <double> cities_positions;
@@ -51,10 +52,13 @@ int main(int argc, char* argv[]){
         tsp.sortPopulationbyLoss();
     }
     for (int i = 0; i < tsp.getNGenerations(); i++) {
-        cout << "Generation " << i + 1 << endl;
+        cout << "Rank " << rank << ": Generation " << i + 1 << endl;
         tsp.evolution(i);
+        
+        tsp.saveBestLoss(i, rank);
+
         if (i % tsp.getMigrationStep() == 0 && i != 0) {
-            cout << "Migrating individuals..." << endl;
+            cout << "Rank" << rank << ": Migrating individuals..." << endl;
             migrator = tsp.getbestTravel(i);
             MPI_Barrier(MPI_COMM_WORLD);
             MPI_Gather(migrator.memptr(), nCities, MPI_INT, migrators.memptr(), nCities, MPI_INT, 0, MPI_COMM_WORLD);

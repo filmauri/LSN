@@ -1,0 +1,7 @@
+Norm order1
+Power: 4
+Number of cities110
+Number of individuals in the population: 100
+Number of generations: 300
+Mutation probabilities initialized.
+System initialized!
