@@ -1,10 +1,10 @@
-TYPE                        1
+TYPE                        2
 MIGRATION_STEP              15
 NORM_ORDER					1
-POWER      				    4
-N_CITIES					34
+POWER      				    3
+N_CITIES					110
 N_INDIVIDUALS				100
-N_GENERATIONS				200
+N_GENERATIONS				1000
 PROB_MUTATIONS				5 0.2 0.2 0.2 0.2 0.8
 
 ENDINPUT
