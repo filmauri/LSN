@@ -81,7 +81,7 @@ class Uniform_Sigma : public BlockAverage{
         }
 };
 
-class Buffon : public BlockAverage{ 
+/*class Buffon : public BlockAverage{ 
 
     public:
         Buffon(int M, int N, double L_, double d_) : BlockAverage(M, N), Length(L_), d(d_) {;}
@@ -99,7 +99,42 @@ class Buffon : public BlockAverage{
 
     private:
         double Length, d, probability;
+};*/
+
+class Buffon : public BlockAverage{ 
+
+    public:
+        Buffon(int M, int N, double L_, double d_) : BlockAverage(M, N), Length(L_), d(d_) {;}
+        virtual ~Buffon() {;}
+        double block() override{
+            probability = 0;
+            double sinTheta = 0.;
+            double estremo2 = 0.;
+            double estremo1 = 0.;
+            double x = 0.;
+            double y = 0.;
+            for (int j = 0; j < L; j++){
+                estremo1 = rnd.Rannyu(0., d);
+                do {
+                    x = rnd.Rannyu(); 
+                    y = rnd.Rannyu(-1., 1.); 
+                } while (sqrt(pow(x, 2) + pow(y, 2)) > 1); 
+            
+                sinTheta = y / sqrt(pow(x, 2) + pow(y, 2)); 
+                estremo2 = estremo1 + Length * sinTheta; 
+                
+                if (estremo2 >= d || estremo2 <= 0) {
+                    probability += 1;
+                }
+
+            }   
+            return (2*Length*L)/(d*probability);
+        }
+
+    private:
+        double Length, d, probability;
 };
+
 
 class IntegralUniform : public BlockAverage{ 
 

@@ -14,7 +14,7 @@ int main(){
     double M = 1000000; //Number of throws
     double N = 100; //Number of blocks
     double L = 1.; //Needle length
-    double d = 1.1; //Distance between lines
+    double d = 2.; //Distance between lines
     
     Buffon test(M, N, L, d);
     ofstream WriteBuffon;
