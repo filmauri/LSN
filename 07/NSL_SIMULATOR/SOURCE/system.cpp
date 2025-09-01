@@ -142,6 +142,7 @@ void System :: initialize(){ // Initialize the System object according to the co
   Primes >> p1 >> p2 ;
   Primes.close();
   int seed[4]; // Read the seed of the RNG
+
   ifstream Seed("../INPUT/seed.in");
   Seed >> seed[0] >> seed[1] >> seed[2] >> seed[3];
   _rnd.SetRandom(seed,p1,p2);
@@ -633,7 +634,7 @@ void System :: measure(){ // Measure properties
         distance(2) = this->pbc( _particle(i).getposition(2,true) - _particle(j).getposition(2,true), 2);
         dr = sqrt( dot(distance,distance) );
         if(dr < _halfside.min() and _measure_gofr){
-					_measurement(_index_gofr + int(floor(dr/double(_bin_size)))) += 2 ;
+					_measurement(_index_gofr + int(floor(dr/double(_bin_size)))) += 2. ;
 				}
         if(dr < _r_cut){
           if(_measure_penergy)  penergy_temp += 1.0/pow(dr,12) - 1.0/pow(dr,6); // POTENTIAL ENERGY
@@ -682,8 +683,14 @@ void System :: measure(){ // Measure properties
   // TEMPERATURE ///////////////////////////////////////////////////////////////
   if (_measure_temp and _measure_kenergy) _measurement(_index_temp) = (2.0/3.0) * kenergy_temp;
   // PRESSURE //////////////////////////////////////////////////////////////////
-  if (_measure_pressure) _measurement[_index_pressure] = _rho * (2.0/3.0) * kenergy_temp + (_ptail*_npart + 48.0*virial/3.0)/_volume;
-  // MAGNETIZATION /////////////////////////////////////////////////////////////
+  if (_measure_pressure){
+    if(_sim_type == 0){
+      _measurement[_index_pressure] = _rho * (2.0/3.0) * kenergy_temp + (_ptail*_npart + 48.0*virial/3.0)/(_volume);
+    }
+    if(_sim_type == 1){
+      _measurement[_index_pressure] = _rho * _temp + (_ptail*_npart + 48.0*virial/3.0)/(_volume);
+    }
+  } // MAGNETIZATION /////////////////////////////////////////////////////////////
   if(_measure_chi or _measure_magnet){
     for (int i=0; i<_npart; i++)
       spinsum += double(_particle(i).getspin());
