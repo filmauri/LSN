@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 double computeError(double av, double av2, int n)
@@ -51,25 +52,21 @@ void metro(double &x, Random &rnd, double sigma, double mu, double step, int &at
     attempted++;
 }
 
-double eval_H_psi( double x, double mu, double sigma) {
-    // Precompute coefficients
+double eval_H_psi(double x, double mu, double sigma) {
     double sigma2 = sigma * sigma;
     double sigma4 = sigma2 * sigma2;
-    //double a = 1.0 / (2.0 * sigma2);
-    double b = mu / sigma2;
 
-    // Compute the ratio Psi''(x) / Psi(x)
-    double term1 = x * x / sigma4;
-    double term2 = (2.0 * mu * x / sigma4) * tanh(b * x);
-    double term3 = 1.0 / sigma2;
-    double term4 = (mu * mu) / sigma4;
-    double psi2_over_psi = term1 - term2 - term3 + term4;
+    double exp1 = exp(- (x - mu) * (x - mu) / (2.0 * sigma2));
+    double exp2 = exp(- (x + mu) * (x + mu) / (2.0 * sigma2));
+    double psi = exp1 + exp2;
 
-    // Kinetic contribution: -(ħ^2 / 2m) * (Psi''/Psi)
-    double kinetic = - 1./2. * psi2_over_psi;
+    double d2_exp1 = (((x - mu)*(x - mu)) / sigma4) - (1./sigma2);
+    double d2_exp2 = (((x + mu)*(x + mu)) / sigma4) - (1./sigma2);
+    
+    double der = exp1 * d2_exp1 + exp2 * d2_exp2;
 
-    // Potential contribution: V(x)
-    double potential = pow(x, 4) - 5 * pow(x, 2) / 2;
+    double kinetic = - 0.5 * der / psi;
+    double potential = pow(x, 4) - 5./2. * x * x;
 
     return kinetic + potential;
 }

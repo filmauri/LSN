@@ -9,7 +9,7 @@
 using namespace std;
 int main()
 {   
-    double sigma = 1., mu = 0.;
+    double sigma = 1., mu = 2.;
     double x = 0.;
     int accepted = 1, attempted = 1;
     double integral = 0.;
